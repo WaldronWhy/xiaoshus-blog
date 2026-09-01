@@ -3,6 +3,7 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+import { remarkMermaid } from './src/plugins/remark-mermaid.mjs';
 
 // https://astro.build/config
 export default defineConfig({
@@ -11,7 +12,7 @@ export default defineConfig({
   base: '/xiaoshus-blog',
 
   markdown: {
-    remarkPlugins: [remarkMath],
+    remarkPlugins: [remarkMath, remarkMermaid],
     rehypePlugins: [rehypeKatex],
   },
 
@@ -34,6 +35,16 @@ export default defineConfig({
 
       // KaTeX 样式
       customCss: ['./src/styles/katex.css'],
+
+      // Mermaid 客户端渲染（CDN 加载，自动渲染 .mermaid 元素）
+      head: [
+        {
+          tag: 'script',
+          attrs: {
+            src: 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js',
+          },
+        },
+      ],
 
       // 显示最后更新时间
       lastUpdated: true,
