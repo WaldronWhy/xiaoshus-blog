@@ -72,6 +72,57 @@ description: 页面描述（用于 SEO 和搜索摘要）
 
 推送到 `main` 分支后，GitHub Actions 会自动构建并部署。
 
+## 日常更新流程（写完文章后怎么发布）
+
+写完或改完 `.md` 文件后，在项目目录下依次执行三条命令即可：
+
+```bash
+git add .
+git commit -m "描述这次改了什么"
+git push
+```
+
+推送后 GitHub Actions 会在 2~3 分钟内自动构建部署，刷新站点就能看到更新。
+
+想在推送前先在本地看看效果：
+
+```bash
+npm run dev      # 然后访问 http://localhost:4321/xiaoshus-blog/
+```
+
+### 常用检查命令
+
+```bash
+git status                    # 看哪些文件改了、还没提交
+git --no-pager diff           # 看具体改了什么内容
+git --no-pager log --oneline -5   # 看最近的提交记录
+```
+
+### 注意事项
+
+- 只有 `push` 之后线上才会更新，本地保存不会。
+- `dist/` 和 `node_modules/` 已被 `.gitignore` 忽略，不会被提交，
+  线上由 GitHub Actions 重新构建，无需手动上传。
+- 如果 `git push` 报错，先用 `git status` 看是否有未提交的改动，
+  或执行 `git pull` 拉取远程最新内容后再推送。
+- 网络受限导致 `git push` 连不上时，可改用 SSH 通道（见下一节）。
+
+### 关于 SSH 推送通道
+
+本机 HTTPS 的 443 端口访问 `github.com` 被阻断（`git push` 会卡住并报
+`Failed to connect to github.com port 443`），但 SSH 的 22 端口可用，
+因此远程地址已配置为 SSH：
+
+```
+git@github.com:WaldronWhy/xiaoshus-blog.git
+```
+
+如果换了一台网络正常的电脑，`git push` 用 HTTPS 也没问题，不必强行改回。
+若需要在新电脑上配置 SSH，做法是：生成密钥 `ssh-keygen -t ed25519`，
+把 `~/.ssh/id_ed25519.pub` 的内容粘贴到 GitHub 的
+Settings → SSH and GPG keys → New SSH key，然后
+`git remote set-url origin git@github.com:WaldronWhy/xiaoshus-blog.git`。
+
 ## LaTeX 公式用法
 
 ### 行内公式
