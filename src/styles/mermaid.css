@@ -1,0 +1,20 @@
+/* Mermaid 图表样式适配 */
+.mermaid {
+  width: 100%;
+  overflow-x: auto;
+  text-align: center;
+  padding: 1rem 0;
+}
+
+/* 让 SVG 撑满容器宽度，高度等比缩放 */
+.mermaid svg {
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+/* 暗色主题适配：mermaid 默认浅色背景，在暗色模式下加个边框区分 */
+:root[data-theme='dark'] .mermaid {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  padding: 1rem;
+}

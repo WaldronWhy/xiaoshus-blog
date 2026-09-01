@@ -33,8 +33,8 @@ export default defineConfig({
         github: 'https://github.com/WaldronWhy',
       },
 
-      // KaTeX 样式
-      customCss: ['./src/styles/katex.css'],
+      // KaTeX + Mermaid 样式
+      customCss: ['./src/styles/katex.css', './src/styles/mermaid.css'],
 
       // Mermaid 客户端渲染（CDN 加载，自动渲染 .mermaid 元素）
       head: [
