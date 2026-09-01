@@ -260,6 +260,32 @@ xiaoshu-site/
    },
    ```
 
+## 避坑记录（重建/升级时必看）
+
+### 1. @astrojs/sitemap 构建崩溃（Astro 4.x）
+- **现象**：清缓存（删 node_modules / .astro / dist）后 `npm run build` 报 `Cannot read properties of undefined (reading 'reduce')`，定位到 `node_modules/@astrojs/sitemap/dist/index.js:85`。
+- **根因**：sitemap 3.7.4 在 `astro:routes:resolved` 钩子中给 `_routes` 赋值，但 Astro 4.16 上该钩子不触发，导致 `_routes` 为 undefined，在 `astro:build:done` 中调用 `_routes.reduce` 崩溃。
+- **修复**：已用 patch-package 打补丁（`patches/@astrojs+sitemap+3.7.4.patch`），把 `_routes.reduce` 改为 `(_routes ?? []).reduce`；`package.json` 已加 `"postinstall": "patch-package"`，CI 中 `npm ci` 会自动应用。
+- **注意**：Starlight 0.28 **没有** `sitemap` 配置选项，不能写 `sitemap: false`，会报 `Unrecognized key(s) in object: 'sitemap'`。
+
+### 2. 项目站点 base 路径
+- 部署到 `https://waldronwhy.github.io/xiaoshu-blog/` 时，`astro.config.mjs` 必须设 `site: 'https://waldronwhy.github.io'` + `base: '/xiaoshus-blog'`。
+- Starlight 侧边栏链接会自动加 base 前缀，但**正文 Markdown 里的绝对链接和首页 hero action link 不会**，需手动加 `/xiaoshus-blog` 前缀。
+- 改仓库名时：`base`、正文链接前缀、editLink 都要同步改。
+
+### 3. Astro / Starlight 版本与 Node 兼容
+- 本机 Node v20，**不能用 Astro 7 / create-astro 5**（要求 Node ≥22.12）。必须锁 `astro@^4.16` + `@astrojs/starlight@^0.28`。
+- Starlight 0.28 的 `social` 必须是对象（如 `social:{github:'...'}`），不支持数组；不识别顶层 `footer`、`search` 键。
+- pagefind 在 windows-x64 首次构建可能报 "Failed to install pagefind"，手动 `npm i pagefind -D` 即可。
+
+### 4. Windows 中文文件名 / Content Loader bug
+- Starlight 0.28 模板自带的 `src/content.config.ts`（docsLoader）在 Windows 上会导致中文 slug 乱码且只生成首页。必须改用传统 `src/content/config.ts`（`defineCollection({type:'content', schema:docsSchema()})` glob 方式）。
+- 所有目录名 / 文件名必须用英文或数字，中文只放 frontmatter 的 `title` 里。
+
+### 5. GitHub Pages 项目站点
+- 每个仓库要单独在 Settings → Pages 把 Source 设为 **GitHub Actions**，用户站点（`WaldronWhy.github.io`）的设置不会自动应用到项目站点。
+- 部署工作流 `.github/workflows/deploy.yml` 对用户站点和项目站点通用，只要 Astro 构建时 base 正确即可。
+
 ## 技术栈
 
 | 层级 | 技术 | 版本 |
