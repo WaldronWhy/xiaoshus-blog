@@ -1,9 +1,16 @@
-// @ts-check
+﻿// @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import { unified } from '@astrojs/markdown-remark';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import { remarkMermaid } from './src/plugins/remark-mermaid.mjs';
+
+// Astro 7 新的 Markdown 配置方式：unified() 返回值放在 markdown.processor 下
+const markdownProcessor = unified({
+  remarkPlugins: [remarkMath, remarkMermaid],
+  rehypePlugins: [rehypeKatex],
+});
 
 // https://astro.build/config
 export default defineConfig({
@@ -12,8 +19,7 @@ export default defineConfig({
   base: '/xiaoshus-blog',
 
   markdown: {
-    remarkPlugins: [remarkMath, remarkMermaid],
-    rehypePlugins: [rehypeKatex],
+    processor: markdownProcessor,
   },
 
   integrations: [
@@ -28,10 +34,10 @@ export default defineConfig({
         },
       },
 
-      // 社交链接
-      social: {
-        github: 'https://github.com/WaldronWhy',
-      },
+      // 社交链接（Starlight 0.33+ 必须用数组格式，每项需 label）
+      social: [
+        { icon: 'github', href: 'https://github.com/WaldronWhy', label: 'GitHub' },
+      ],
 
       // KaTeX + Mermaid 样式
       customCss: ['./src/styles/katex.css', './src/styles/mermaid.css'],
@@ -55,17 +61,17 @@ export default defineConfig({
 
         {
           label: '📚 学习笔记',
-          autogenerate: { directory: 'notes' },
+          items: [{ autogenerate: { directory: 'notes' } }],
           collapsed: true,
         },
         {
           label: '🤖 AI 技术',
-          autogenerate: { directory: 'ai' },
+          items: [{ autogenerate: { directory: 'ai' } }],
           collapsed: true,
         },
         {
           label: '💻 编程笔记',
-          autogenerate: { directory: 'coding' },
+          items: [{ autogenerate: { directory: 'coding' } }],
           collapsed: true,
         },
 
@@ -86,39 +92,39 @@ export default defineConfig({
                   label: '一、数学基础',
                   collapsed: true,
                   items: [
-                    { label: '高等数学', autogenerate: { directory: 'textbooks/ai/math-foundations/calculus' } },
-                    { label: '线性代数', autogenerate: { directory: 'textbooks/ai/math-foundations/linear-algebra' } },
-                    { label: '概率论与数理统计', autogenerate: { directory: 'textbooks/ai/math-foundations/probability-statistics' } },
-                    { label: '最优化方法', autogenerate: { directory: 'textbooks/ai/math-foundations/optimization' } },
+                    { label: '高等数学', items: [{ autogenerate: { directory: 'textbooks/ai/math-foundations/calculus' } }] },
+                    { label: '线性代数', items: [{ autogenerate: { directory: 'textbooks/ai/math-foundations/linear-algebra' } }] },
+                    { label: '概率论与数理统计', items: [{ autogenerate: { directory: 'textbooks/ai/math-foundations/probability-statistics' } }] },
+                    { label: '最优化方法', items: [{ autogenerate: { directory: 'textbooks/ai/math-foundations/optimization' } }] },
                   ],
                 },
                 {
                   label: '二、程序设计',
                   collapsed: true,
                   items: [
-                    { label: 'Python 程序设计', autogenerate: { directory: 'textbooks/ai/programming/python' } },
-                    { label: '数据结构与算法', autogenerate: { directory: 'textbooks/ai/programming/data-structures' } },
+                    { label: 'Python 程序设计', items: [{ autogenerate: { directory: 'textbooks/ai/programming/python' } }] },
+                    { label: '数据结构与算法', items: [{ autogenerate: { directory: 'textbooks/ai/programming/data-structures' } }] },
                   ],
                 },
                 {
                   label: '三、人工智能核心',
                   collapsed: true,
                   items: [
-                    { label: '机器学习', autogenerate: { directory: 'textbooks/ai/ai-core/machine-learning' } },
-                    { label: '深度学习', autogenerate: { directory: 'textbooks/ai/ai-core/deep-learning' } },
-                    { label: '计算机视觉', autogenerate: { directory: 'textbooks/ai/ai-core/computer-vision' } },
-                    { label: '自然语言处理', autogenerate: { directory: 'textbooks/ai/ai-core/nlp' } },
-                    { label: '强化学习', autogenerate: { directory: 'textbooks/ai/ai-core/reinforcement-learning' } },
-                    { label: '知识表示与推理', autogenerate: { directory: 'textbooks/ai/ai-core/knowledge-reasoning' } },
+                    { label: '机器学习', items: [{ autogenerate: { directory: 'textbooks/ai/ai-core/machine-learning' } }] },
+                    { label: '深度学习', items: [{ autogenerate: { directory: 'textbooks/ai/ai-core/deep-learning' } }] },
+                    { label: '计算机视觉', items: [{ autogenerate: { directory: 'textbooks/ai/ai-core/computer-vision' } }] },
+                    { label: '自然语言处理', items: [{ autogenerate: { directory: 'textbooks/ai/ai-core/nlp' } }] },
+                    { label: '强化学习', items: [{ autogenerate: { directory: 'textbooks/ai/ai-core/reinforcement-learning' } }] },
+                    { label: '知识表示与推理', items: [{ autogenerate: { directory: 'textbooks/ai/ai-core/knowledge-reasoning' } }] },
                   ],
                 },
                 {
                   label: '四、工程实践',
                   collapsed: true,
                   items: [
-                    { label: '数据工程', autogenerate: { directory: 'textbooks/ai/engineering/data-engineering' } },
-                    { label: '实验设计与评估', autogenerate: { directory: 'textbooks/ai/engineering/experiment-design' } },
-                    { label: '模型部署与 MLOps', autogenerate: { directory: 'textbooks/ai/engineering/mlops' } },
+                    { label: '数据工程', items: [{ autogenerate: { directory: 'textbooks/ai/engineering/data-engineering' } }] },
+                    { label: '实验设计与评估', items: [{ autogenerate: { directory: 'textbooks/ai/engineering/experiment-design' } }] },
+                    { label: '模型部署与 MLOps', items: [{ autogenerate: { directory: 'textbooks/ai/engineering/mlops' } }] },
                   ],
                 },
               ],
@@ -130,10 +136,10 @@ export default defineConfig({
               collapsed: true,
               items: [
                 { label: '教材首页', link: '/textbooks/modeling/' },
-                { label: '一、基础篇', autogenerate: { directory: 'textbooks/modeling/01-foundations' } },
-                { label: '二、方法篇', autogenerate: { directory: 'textbooks/modeling/02-methods' } },
-                { label: '三、工具篇', autogenerate: { directory: 'textbooks/modeling/03-tools' } },
-                { label: '四、实战篇', autogenerate: { directory: 'textbooks/modeling/04-practice' } },
+                { label: '一、基础篇', items: [{ autogenerate: { directory: 'textbooks/modeling/01-foundations' } }] },
+                { label: '二、方法篇', items: [{ autogenerate: { directory: 'textbooks/modeling/02-methods' } }] },
+                { label: '三、工具篇', items: [{ autogenerate: { directory: 'textbooks/modeling/03-tools' } }] },
+                { label: '四、实战篇', items: [{ autogenerate: { directory: 'textbooks/modeling/04-practice' } }] },
               ],
             },
 
@@ -143,13 +149,13 @@ export default defineConfig({
               collapsed: true,
               items: [
                 { label: '教材首页', link: '/textbooks/chemistry/' },
-                { label: '一、数理基础与化学总论', autogenerate: { directory: 'textbooks/chemistry/01-foundations' } },
-                { label: '二、无机化学', autogenerate: { directory: 'textbooks/chemistry/02-inorganic' } },
-                { label: '三、分析化学', autogenerate: { directory: 'textbooks/chemistry/03-analytical' } },
-                { label: '四、物理化学', autogenerate: { directory: 'textbooks/chemistry/04-physical' } },
-                { label: '五、结构化学与量子化学', autogenerate: { directory: 'textbooks/chemistry/05-structural-quantum' } },
-                { label: '六、有机化学', autogenerate: { directory: 'textbooks/chemistry/06-organic' } },
-                { label: '七、高分子化学', autogenerate: { directory: 'textbooks/chemistry/07-polymer' } },
+                { label: '一、数理基础与化学总论', items: [{ autogenerate: { directory: 'textbooks/chemistry/01-foundations' } }] },
+                { label: '二、无机化学', items: [{ autogenerate: { directory: 'textbooks/chemistry/02-inorganic' } }] },
+                { label: '三、分析化学', items: [{ autogenerate: { directory: 'textbooks/chemistry/03-analytical' } }] },
+                { label: '四、物理化学', items: [{ autogenerate: { directory: 'textbooks/chemistry/04-physical' } }] },
+                { label: '五、结构化学与量子化学', items: [{ autogenerate: { directory: 'textbooks/chemistry/05-structural-quantum' } }] },
+                { label: '六、有机化学', items: [{ autogenerate: { directory: 'textbooks/chemistry/06-organic' } }] },
+                { label: '七、高分子化学', items: [{ autogenerate: { directory: 'textbooks/chemistry/07-polymer' } }] },
               ],
             },
           ],
@@ -157,7 +163,7 @@ export default defineConfig({
 
         {
           label: '📝 随笔',
-          autogenerate: { directory: 'essay' },
+          items: [{ autogenerate: { directory: 'essay' } }],
           collapsed: true,
         },
       ],

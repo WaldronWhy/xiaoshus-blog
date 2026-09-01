@@ -262,30 +262,73 @@ xiaoshu-site/
 
 ## 避坑记录（重建/升级时必看）
 
-### 1. @astrojs/sitemap 构建崩溃（Astro 4.x）
-- **现象**：清缓存（删 node_modules / .astro / dist）后 `npm run build` 报 `Cannot read properties of undefined (reading 'reduce')`，定位到 `node_modules/@astrojs/sitemap/dist/index.js:85`。
-- **根因**：sitemap 3.7.4 在 `astro:routes:resolved` 钩子中给 `_routes` 赋值，但 Astro 4.16 上该钩子不触发，导致 `_routes` 为 undefined，在 `astro:build:done` 中调用 `_routes.reduce` 崩溃。
-- **修复**：已用 patch-package 打补丁（`patches/@astrojs+sitemap+3.7.4.patch`），把 `_routes.reduce` 改为 `(_routes ?? []).reduce`；`package.json` 已加 `"postinstall": "patch-package"`，CI 中 `npm ci` 会自动应用。
-- **注意**：Starlight 0.28 **没有** `sitemap` 配置选项，不能写 `sitemap: false`，会报 `Unrecognized key(s) in object: 'sitemap'`。
+### 1. Node 版本要求（Astro 7）
+- **Astro 7 要求 Node ≥22**，本机已装 Node v24.19.0（系统级，`C:\Program Files\nodejs\`）。
+- DoubaoWork 内置 Node v20 不能用于构建 Astro 7，必须用系统级 Node。构建命令前临时改 PATH：`$env:PATH = "C:\Program Files\nodejs;$env:PATH"`。
+- CI 工作流（`.github/workflows/deploy.yml`）里 `node-version` 必须设为 22 或 24，不能用 20。
+- npm 11+ 有 `allow-scripts` 安全机制，esbuild 的 postinstall 脚本需批准：`npm approve-scripts esbuild`，否则构建失败。
 
-### 2. 项目站点 base 路径
-- 部署到 `https://waldronwhy.github.io/xiaoshu-blog/` 时，`astro.config.mjs` 必须设 `site: 'https://waldronwhy.github.io'` + `base: '/xiaoshus-blog'`。
+### 2. Markdown 配置方式（Astro 7 重大变化）
+- Astro 7 默认用 Sätteri（Rust Markdown 处理器），**不再支持** `markdown: { remarkPlugins: [...], rehypePlugins: [...] }` 写法。
+- 需安装 `@astrojs/markdown-remark`，用 `unified()` 配置，且**必须放在 `markdown.processor` 键下**：
+  ```js
+  import { unified } from '@astrojs/markdown-remark';
+  export default defineConfig({
+    markdown: {
+      processor: unified({
+        remarkPlugins: [remarkMath, remarkMermaid],
+        rehypePlugins: [rehypeKatex],
+      }),
+    },
+  });
+  ```
+- **常见错误**：把 `unified({...})` 直接赋值给 `markdown`（如 `markdown: unified({...})`），Astro 不识别会静默回退到 Sätteri，导致 KaTeX/mermaid 全部不生效且无报错。
+
+### 3. Content Collections 配置（Astro 7 强制）
+- Astro 7 **移除了**传统 `src/content/config.ts`（type:'content' + glob 方式），必须用 `src/content.config.ts`（注意在 src/ 下，不是 src/content/ 下）+ loader：
+  ```ts
+  import { defineCollection } from 'astro:content';
+  import { docsLoader } from '@astrojs/starlight/loaders';
+  import { docsSchema } from '@astrojs/starlight/schema';
+  export const collections = {
+    docs: defineCollection({ loader: docsLoader(), schema: docsSchema() }),
+  };
+  ```
+- 之前 Astro 4 上 docsLoader 在 Windows 的中文文件名 bug（只生成 1 页）在 Astro 7 已修复。
+- 所有目录名 / 文件名仍须用英文或数字，中文只放 frontmatter 的 `title`。
+
+### 4. Starlight 0.41 配置 breaking changes
+- **social 必须是数组**，每项需 `icon`、`href`、`label` 三个字段：
+  ```js
+  social: [{ icon: 'github', href: '...', label: 'GitHub' }]
+  ```
+  旧的对象写法 `social: { github: '...' }` 不再支持。
+- **sidebar autogenerate 必须包裹在 `items` 数组里**（0.39 起）：
+  ```js
+  // 错误（旧写法）
+  { label: '笔记', autogenerate: { directory: 'notes' }, collapsed: true }
+  // 正确（新写法）
+  { label: '笔记', items: [{ autogenerate: { directory: 'notes' } }], collapsed: true }
+  ```
+- `collapsed` 属性仍支持，和 `label`、`items` 同级。
+
+### 5. sitemap 崩溃（已在 Astro 7 修复）
+- Astro 4 上 `@astrojs/sitemap` 因 `astro:routes:resolved` 钩子不触发导致 `_routes.reduce` 崩溃，需 patch-package 打补丁。
+- **Astro 7 上该问题已修复**，不再需要 patch-package，已移除 `postinstall` 脚本和 `patches/` 目录。
+
+### 6. 项目站点 base 路径
+- 部署到 `https://waldronwhy.github.io/xiaoshus-blog/` 时，`astro.config.mjs` 必须设 `site: 'https://waldronwhy.github.io'` + `base: '/xiaoshus-blog'`。
 - Starlight 侧边栏链接会自动加 base 前缀，但**正文 Markdown 里的绝对链接和首页 hero action link 不会**，需手动加 `/xiaoshus-blog` 前缀。
 - 改仓库名时：`base`、正文链接前缀、editLink 都要同步改。
 
-### 3. Astro / Starlight 版本与 Node 兼容
-- 本机 Node v20，**不能用 Astro 7 / create-astro 5**（要求 Node ≥22.12）。必须锁 `astro@^4.16` + `@astrojs/starlight@^0.28`。
-- Starlight 0.28 的 `social` 必须是对象（如 `social:{github:'...'}`），不支持数组；不识别顶层 `footer`、`search` 键。
-- pagefind 在 windows-x64 首次构建可能报 "Failed to install pagefind"，手动 `npm i pagefind -D` 即可。
-
-### 4. Windows 中文文件名 / Content Loader bug
-- Starlight 0.28 模板自带的 `src/content.config.ts`（docsLoader）在 Windows 上会导致中文 slug 乱码且只生成首页。必须改用传统 `src/content/config.ts`（`defineCollection({type:'content', schema:docsSchema()})` glob 方式）。
-- 所有目录名 / 文件名必须用英文或数字，中文只放 frontmatter 的 `title` 里。
-
-### 5. GitHub Pages 项目站点
+### 7. GitHub Pages 项目站点
 - 每个仓库要单独在 Settings → Pages 把 Source 设为 **GitHub Actions**，用户站点（`WaldronWhy.github.io`）的设置不会自动应用到项目站点。
-- 部署工作流 `.github/workflows/deploy.yml` 对用户站点和项目站点通用，只要 Astro 构建时 base 正确即可。
+- 部署工作流对用户站点和项目站点通用，只要 Astro 构建时 base 正确即可。
 
+### 8. Mermaid 图表渲染
+- 用自定义 remark 插件（`src/plugins/remark-mermaid.mjs`）把 ` ```mermaid ` 代码块转成 `<div class="mermaid">`，客户端通过 CDN 加载 mermaid.js 自动渲染。
+- 不用构建时渲染（rehype-mermaid 需 playwright，安装体积大且 CI 慢）。
+- mermaid 图默认浅色背景，在暗色主题下加了 CSS 适配（`src/styles/mermaid.css`）；超宽图允许横向滚动保持清晰度。
 ## 技术栈
 
 | 层级 | 技术 | 版本 |
