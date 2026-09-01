@@ -17,15 +17,22 @@
 # 安装依赖
 npm install
 
-# 启动开发服务器（默认 http://localhost:4321）
+# 启动开发服务器
 npm run dev
+
+# ⚠️ 注意：本项目配置了 base: '/xiaoshus-blog'，访问地址是
+# http://localhost:4321/xiaoshus-blog/
+# 直接访问 http://localhost:4321/ 会 404
 
 # 构建生产版本
 npm run build
 
-# 本地预览构建结果
+# 本地预览构建结果（同样访问 http://localhost:4321/xiaoshus-blog/）
 npm run preview
 ```
+
+> ⚠️ 构建产物 `dist/` 里的资源全部是 `/xiaoshus-blog/...` 绝对路径，
+> **不能直接双击 `dist/index.html` 用浏览器打开**（会白屏），必须通过 `npm run dev` 或 `npm run preview` 起服务访问。
 
 ## 如何添加新文档
 
