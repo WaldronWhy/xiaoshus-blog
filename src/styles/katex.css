@@ -1,0 +1,14 @@
+/* KaTeX 数学公式样式 */
+@import 'katex/dist/katex.min.css';
+
+/* 行内公式与文字对齐微调 */
+.katex {
+  font-size: 1.05em;
+}
+
+/* 块级公式溢出处理 */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5rem 0;
+}

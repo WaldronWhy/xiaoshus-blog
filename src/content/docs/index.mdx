@@ -1,0 +1,43 @@
+---
+title: 小澍的知识库
+description: 学习笔记、教材与技术文档
+template: splash
+hero:
+  tagline: 记录学习，沉淀思考
+  image:
+    file: ../../assets/houston.webp
+  actions:
+    - text: 教材专区
+      link: /xiaoshus-blog/textbooks/
+      icon: right-arrow
+    - text: GitHub
+      link: https://github.com/WaldronWhy
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## 内容分类
+
+<CardGrid stagger>
+  <Card title="📖 教材专区" icon="open-book">
+    AI 教材、数学建模竞赛教材、高等化学教材三套系统教程，共 200+ 章节。
+  </Card>
+  <Card title="📚 学习笔记" icon="document">
+    高等数学、线性代数等课程笔记与公式推导。
+  </Card>
+  <Card title="🤖 AI 技术" icon="sparkles">
+    机器学习、深度学习、数据标注、NLP 等方向的学习记录。
+  </Card>
+  <Card title="💻 编程笔记" icon="code">
+    Python、MATLAB、Web 前端等技术栈的速查手册。
+  </Card>
+</CardGrid>
+
+## 本站特性
+
+- **LaTeX 支持**：行内公式 $E=mc^2$ 和块级公式均可完美渲染
+- **全文搜索**：顶部搜索框快速定位内容
+- **暗黑模式**：支持明暗主题切换
+- **Markdown 写作**：纯文本文件，更新方便

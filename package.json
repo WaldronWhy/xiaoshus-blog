@@ -1,0 +1,23 @@
+{
+  "name": "xiaoshu-site",
+  "type": "module",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "^0.28.0",
+    "astro": "^4.16.0",
+    "katex": "^0.16.11",
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0",
+    "sharp": "^0.33.5"
+  },
+  "devDependencies": {
+    "pagefind": "^1.5.2"
+  }
+}
